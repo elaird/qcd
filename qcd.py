@@ -41,7 +41,7 @@ def arithmetic(y):
     assert y.n_SST
     val = (y.n_M - y.ewk_M) * (y.n_SST - y.ewk_SST) / (y.n_SSL - y.ewk_SSL)
     err = val * r.TMath.sqrt(y.n_SST) / y.n_SST
-    return val, err
+    return val, err, None
 
 
 def rIni(y):
@@ -56,7 +56,7 @@ def fit_qcd(y):
     wimport(w, r.RooRealVar("r", "r", rIni(y), 0.0, 1.0))  # r2 above
     wimport(w, r.RooRealVar("qcd_SSL", "qcd_SSL", y.n_SSL, 0.0, 10.0 * max(1.0, y.n_SSL)))
     qcdIni = arithmetic(y)[0]
-    wimport(w, r.RooRealVar("qcd", "qcd", qcdIni, 0.0, 10.0 * max(1.0, qcdIni)))
+    wimport(w, r.RooRealVar("qcd", "qcd", qcdIni, 0.0, 5.0 * max(1.0, qcdIni)))
 
     for l in ["M", "SSL", "SST"]:
         wimport(w, r.RooRealVar("ewk_%s" % l, "ewk_%s" % l, getattr(y, "ewk_%s" % l)))
@@ -72,13 +72,29 @@ def fit_qcd(y):
     w.factory("PROD::model(pois_M,pois_SSL,pois_SST)")
 
     w.defineSet("obs", common.argSet(w, ["n_M", "n_SSL", "n_SST"]))
+    dataset = common.dataset(w.set("obs"))
+
     #w.Print()
 
-    res = common.fit(pdf=w.pdf("model"), obsSet=w.set("obs"))
+    pdf = w.pdf("model")
+    res = common.fit(pdf=pdf, dataset=dataset)
     #res.Print()
 
     var = w.var("qcd")
-    return (var.getVal(), var.getError())
+    out = [var.getVal(), var.getError()]
+
+    # ugh -- plot
+    modelConfig = r.RooStats.ModelConfig("modelConfig", w)
+    modelConfig.SetPdf(pdf)
+    modelConfig.SetParametersOfInterest("qcd")
+
+    calc = r.RooStats.ProfileLikelihoodCalculator(dataset, modelConfig)
+    calc.SetConfidenceLevel(0.68)
+    lInt = calc.GetInterval()
+    plot = r.RooStats.LikelihoodIntervalPlot(lInt)
+    plot.SetMaximum(4.0)
+    plot.Draw()
+    return out + [plot]
 
 
 if __name__ == "__main__":
