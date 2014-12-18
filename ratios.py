@@ -96,59 +96,21 @@ def fit_two_terms(y):
     return (rVar.getVal(), rVar.getError())
 
 
-def one_page(canvas, pdf, tag, yTitle, yRange, results):
-    h = r.TH1D("h", "%s;%s" % (tag, yTitle), len(results), 0.0, len(results))
-    h.SetStats(False)
-    hx = h.GetXaxis()
-    h.GetYaxis().SetTitleOffset(1.25)
-
-    for iRes, (label, (val, err)) in enumerate(results):
-        iBin = 1 + iRes
-        hx.SetBinLabel(iBin, label.replace(tag, ""))
-        h.SetBinContent(iBin, val)
-        h.SetBinError(iBin, err)
-    h.Draw()
-    h.SetMinimum(yRange[0])
-    h.SetMaximum(yRange[1])
-    r.gPad.SetGridy()
-    r.gPad.SetTickx()
-    r.gPad.SetTicky()
-    canvas.Print(pdf)
-
-
-def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
-    canvas = r.TCanvas()
-    canvas.Print(pdf + "[")
-
-    for tag in tags:
-        results = []
-        for y in data():
-            if tag not in y.label:
-                continue
-            results.append((y.label, func(y)))
-        one_page(canvas, pdf, tag, yTitle, yRange, results)
-
-    canvas.Print(pdf + "]")
-
-    
 if __name__ == "__main__":
-    r.gROOT.SetBatch(True)
-    r.gErrorIgnoreLevel = r.kWarning
-    r.gPrintViaErrorHandler = True
-    r.RooRandom.randomGenerator().SetSeed(1)
+    common.setup()
 
     __L2M = {"yRange": (-0.02, 0.32),
              "yTitle": "CSVL to CSVM",
              "data": data_CSV_L2M,
              "tags": ["1tag;", "2tag;"]}
 
-    go(pdf="L2M_fit.pdf", func=fit_two_terms, **__L2M)
-    go(pdf="L2M_arithmetic.pdf", func=arithmetic, **__L2M)
+    common.go(pdf="L2M_fit.pdf", func=fit_two_terms, **__L2M)
+    common.go(pdf="L2M_arithmetic.pdf", func=arithmetic, **__L2M)
 
     __R2T = {"yRange": (-0.1, 1.0),
              "yTitle": "relaxed to tight",
              "data": data_SS_relaxed_to_tight,
              "tags": ["1;", "2;"]}
 
-    go(pdf="R2T_fit.pdf", func=fit_two_terms, **__R2T)
-    go(pdf="R2T_arithmetic.pdf", func=arithmetic, **__R2T)
+    common.go(pdf="R2T_fit.pdf", func=fit_two_terms, **__R2T)
+    common.go(pdf="R2T_arithmetic.pdf", func=arithmetic, **__R2T)
