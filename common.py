@@ -71,7 +71,12 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
         for y in data():
             if tag not in y.label:
                 continue
-            results.append((y.label, func(y)))
+            val, err, plot = func(y)
+            if plot:
+                plot.Draw()
+                canvas.Print(pdf)
+
+            results.append((y.label, (val, err)))
         one_page(canvas, pdf, tag, yTitle, yRange, results)
 
     canvas.Print(pdf + "]")
