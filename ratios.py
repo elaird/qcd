@@ -1,15 +1,8 @@
 #!/usr/bin/env python
 
 import ROOT as r
-
-
-def wimport(w, item):
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)  # suppress info messages
-    if item.ClassName() == "RooPoisson":
-        item.protectNegativeMean()
-        item.setNoRounding()
-    getattr(w, "import")(item)
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)  # re-enable all messages
+import common
+wimport = common.wimport
 
 
 class yields(object):
@@ -67,31 +60,6 @@ def data_SS_relaxed_to_tight():
         ]
 
 
-def fit(pdf=None, data=None):
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
-    options = [r.RooFit.Verbose(False),
-               r.RooFit.PrintLevel(-1),
-               r.RooFit.Save(True),
-               #r.RooFit.Minos(True),
-           ]
-    return pdf.fitTo(data, *tuple(options))
-
-
-def argSet(w=None, vars=[]):
-    out = r.RooArgSet("out")
-    for item in vars:
-        out.add(w.var(item))
-    return out
-
-
-def dataset(obsSet):
-    out = r.RooDataSet("dataName", "dataTitle", obsSet)
-    #out.reset() #needed?
-    out.add(obsSet)
-    #out.Print("v")
-    return out
-
-
 def arithmetic(y):
     assert y.n_M
     val = (y.n_M - y.ewk_M) / (y.n_L - y.ewk_L)
@@ -117,10 +85,13 @@ def fit_two_terms(y):
         wimport(w, r.RooPoisson("pois_%s" % l, "pois_%s" % l, w.var("n_%s" % l), w.function("mean_%s" % l)))
 
     w.factory("PROD::model(pois_L,pois_M)")
-    w.defineSet("obs", argSet(w, ["n_L", "n_M"]))
+
+    w.defineSet("obs", common.argSet(w, ["n_L", "n_M"]))
     #w.Print()
-    res = fit(pdf=w.pdf("model"), data=dataset(w.set("obs")))
-    res.Print()
+
+    res = common.fit(pdf=w.pdf("model"), obsSet=w.set("obs"))
+    #res.Print()
+
     rVar = w.var("r")
     return (rVar.getVal(), rVar.getError())
 
