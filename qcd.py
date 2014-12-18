@@ -44,14 +44,19 @@ def arithmetic(y):
     return val, err
 
 
+def rIni(y):
+    return (y.n_SST - y.ewk_SST) / (y.n_SSL - y.ewk_SSL)
+
+
 def fit_qcd(y):
     # Pois(n_M | ewk_M + qcd/r2) x Pois(n_SST | ewk_SST + r2*q_SSL) x Pois(n_SSL | ewk_SSL + q_SSL)
 
     w = r.RooWorkspace("Workspace")
     wimport = common.wimport
-    wimport(w, r.RooRealVar("r", "r", 0.2, 0.0, 1.0))  # r2 above
+    wimport(w, r.RooRealVar("r", "r", rIni(y), 0.0, 1.0))  # r2 above
     wimport(w, r.RooRealVar("qcd_SSL", "qcd_SSL", y.n_SSL, 0.0, 10.0 * max(1.0, y.n_SSL)))
-    wimport(w, r.RooRealVar("qcd", "qcd", y.n_SST, 0.0, 10.0 * max(1.0, y.n_SST)))
+    qcdIni = arithmetic(y)[0]
+    wimport(w, r.RooRealVar("qcd", "qcd", qcdIni, 0.0, 10.0 * max(1.0, qcdIni)))
 
     for l in ["M", "SSL", "SST"]:
         wimport(w, r.RooRealVar("ewk_%s" % l, "ewk_%s" % l, getattr(y, "ewk_%s" % l)))
