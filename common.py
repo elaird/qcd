@@ -17,14 +17,14 @@ def wimport(w, item):
     r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)  # re-enable all messages
 
 
-def fit(pdf=None, obsSet=None):
+def fit(pdf=None, dataset=None):
     r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     options = [r.RooFit.Verbose(False),
                r.RooFit.PrintLevel(-1),
                r.RooFit.Save(True),
                #r.RooFit.Minos(True),
            ]
-    return pdf.fitTo(dataset(obsSet), *tuple(options))
+    return pdf.fitTo(dataset, *tuple(options))
 
 
 def argSet(w=None, vars=[]):
