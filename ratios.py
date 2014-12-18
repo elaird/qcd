@@ -71,7 +71,7 @@ def fit_two_terms(y):
     # Pois(n_M | ewk_M + r*q_L) x Pois(n_L | ewk_L + q_L)
 
     w = r.RooWorkspace("Workspace")
-    wimport(w, r.RooRealVar("r", "r", 0.2, -1.0, 1.0))  # parameter of interest: loose to medium factor
+    wimport(w, r.RooRealVar("r", "r", 0.2, -0.1, 1.0))  # parameter of interest: loose to medium factor
     wimport(w, r.RooRealVar("qcd_L", "qcd_L", y.n_L, 0.0, 10.0 * max(1.0, y.n_L)))
 
     for l in ["M", "L"]:
