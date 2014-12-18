@@ -89,7 +89,7 @@ def fit_two_terms(y):
     w.defineSet("obs", common.argSet(w, ["n_L", "n_M"]))
     #w.Print()
 
-    res = common.fit(pdf=w.pdf("model"), obsSet=w.set("obs"))
+    res = common.fit(pdf=w.pdf("model"), dataset=common.dataset(w.set("obs")))
     #res.Print()
 
     rVar = w.var("r")
