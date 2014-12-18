@@ -63,7 +63,7 @@ def arithmetic(y):
     assert y.n_M
     val = (y.n_M - y.ewk_M) / (y.n_L - y.ewk_L)
     err = val * r.TMath.sqrt(y.n_M) / y.n_M
-    return val, err
+    return val, err, None
 
 
 def fit_two_terms(y):
@@ -93,7 +93,7 @@ def fit_two_terms(y):
     #res.Print()
 
     rVar = w.var("r")
-    return (rVar.getVal(), rVar.getError())
+    return (rVar.getVal(), rVar.getError(), None)
 
 
 if __name__ == "__main__":
