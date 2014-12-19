@@ -96,7 +96,7 @@ def fit_two_terms(y):
 if __name__ == "__main__":
     common.setup()
 
-    __L2M = {"yRange": (-0.02, 0.32),
+    __L2M = {"yRange": (0.0, 0.35),
              "yTitle": "CSVL to CSVM",
              "data": data_CSV_L2M,
              "tags": ["1tag;", "2tag;"]}
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     common.go(pdf="L2M_fit.pdf", func=fit_two_terms, **__L2M)
     common.go(pdf="L2M_arithmetic.pdf", func=arithmetic, **__L2M)
 
-    __R2T = {"yRange": (-0.1, 1.0),
+    __R2T = {"yRange": (0.0, 1.0),
              "yTitle": "relaxed to tight",
              "data": data_SS_relaxed_to_tight,
              "tags": ["1;", "2;"]}
