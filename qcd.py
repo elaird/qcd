@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import ROOT as r
+import sys
 import common
 
 
@@ -41,14 +42,25 @@ def arithmetic(y):
     assert y.n_SST
     val = (y.n_M - y.ewk_M) * (y.n_SST - y.ewk_SST) / (y.n_SSL - y.ewk_SSL)
     err = val * r.TMath.sqrt(y.n_SST) / y.n_SST
-    return val, err, None
+    return val, val - err, val + err, None
 
 
 def rIni(y):
     return (y.n_SST - y.ewk_SST) / (y.n_SSL - y.ewk_SSL)
 
 
-def fit_qcd(y):
+def fit_qcd_profile_likelihood(y):
+    return fit_qcd(y, pl=True)
+
+
+def fit_qcd_second_derivative(y):
+    return fit_qcd(y, pl=False)
+
+
+def fit_qcd(y, pl=None):
+    if type(pl) is not bool:
+        sys.exit("Choose whether fit_qcd shall compute PL limits.")
+
     # Pois(n_M | ewk_M + qcd/r2) x Pois(n_SST | ewk_SST + r2*q_SSL) x Pois(n_SSL | ewk_SSL + q_SSL)
 
     w = r.RooWorkspace("Workspace")
@@ -56,7 +68,7 @@ def fit_qcd(y):
     wimport(w, r.RooRealVar("r", "r", rIni(y), 0.0, 1.0))  # r2 above
     wimport(w, r.RooRealVar("qcd_SSL", "qcd_SSL", y.n_SSL, 0.0, 10.0 * max(1.0, y.n_SSL)))
     qcdIni = arithmetic(y)[0]
-    wimport(w, r.RooRealVar("qcd", "qcd", qcdIni, 0.0, 5.0 * max(1.0, qcdIni)))
+    wimport(w, r.RooRealVar("qcd", "qcd", qcdIni, 0.0, 3.0 * max(1.0, qcdIni)))
 
     for l in ["M", "SSL", "SST"]:
         wimport(w, r.RooRealVar("ewk_%s" % l, "ewk_%s" % l, getattr(y, "ewk_%s" % l)))
@@ -82,13 +94,18 @@ def fit_qcd(y):
     #res.Print()
 
     var = w.var("qcd")
-    out = [var.getVal(), var.getError()]
-    out.append(llk_scan_plot(w, pdf, "qcd", dataset))
+    out = [var.getVal()]
+
+    if pl:
+        out += llk_scan(w, pdf, "qcd", dataset)
+    else:
+        out += [var.getVal() - var.getError(), var.getVal() + var.getError(), None]
+
     r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     return out
 
 
-def llk_scan_plot(w, pdf, poiName, dataset):
+def llk_scan(w, pdf, poiName, dataset):
     modelConfig = r.RooStats.ModelConfig("modelConfig", w)
     modelConfig.SetPdf(pdf)
     modelConfig.SetParametersOfInterest(poiName)
@@ -99,7 +116,11 @@ def llk_scan_plot(w, pdf, poiName, dataset):
     lInt = calc.GetInterval()
     plot = r.RooStats.LikelihoodIntervalPlot(lInt)
     plot.SetMaximum(4.0)
-    return plot
+
+    return [lInt.LowerLimit(w.var(poiName)),
+            lInt.UpperLimit(w.var(poiName)),
+            plot,
+            ]
 
 
 if __name__ == "__main__":
@@ -108,5 +129,5 @@ if __name__ == "__main__":
     __qcd = {"data": data, "yTitle": "QCD yield estimate"}
     common.go(pdf="QCD_arithmetic1.pdf", func=arithmetic, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
     common.go(pdf="QCD_arithmetic2.pdf", func=arithmetic, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
-    common.go(pdf="QCD_fit1.pdf", func=fit_qcd, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
-    common.go(pdf="QCD_fit2.pdf", func=fit_qcd, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
+    common.go(pdf="QCD_fit1.pdf", func=fit_qcd_profile_likelihood, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
+    common.go(pdf="QCD_fit2.pdf", func=fit_qcd_profile_likelihood, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
