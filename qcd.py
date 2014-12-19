@@ -48,15 +48,7 @@ def rIni(y):
     return (y.n_SST - y.ewk_SST) / (y.n_SSL - y.ewk_SSL)
 
 
-def fit_qcd_profile_likelihood(y):
-    return fit_qcd(y, pl=True)
-
-
-def fit_qcd_second_derivative(y):
-    return fit_qcd(y, pl=False)
-
-
-def fit_qcd(y, pl):
+def fit_qcd(y):
     # Pois(n_M | ewk_M + qcd/r2) x Pois(n_SST | ewk_SST + r2*q_SSL) x Pois(n_SSL | ewk_SSL + q_SSL)
 
     w = r.RooWorkspace("Workspace")
@@ -83,7 +75,7 @@ def fit_qcd(y, pl):
     dataset = common.dataset(w.set("obs"))
     #w.Print()
 
-    return common.fit_result(w, w.pdf("model"), "qcd", dataset, pl)
+    return common.fit_result(w, w.pdf("model"), "qcd", dataset, pl=True)
 
 
 if __name__ == "__main__":
@@ -92,5 +84,5 @@ if __name__ == "__main__":
     __qcd = {"data": data, "yTitle": "QCD yield estimate"}
     common.go(pdf="QCD_arithmetic1.pdf", func=arithmetic, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
     common.go(pdf="QCD_arithmetic2.pdf", func=arithmetic, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
-    common.go(pdf="QCD_fit1.pdf", func=fit_qcd_profile_likelihood, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
-    common.go(pdf="QCD_fit2.pdf", func=fit_qcd_profile_likelihood, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
+    common.go(pdf="QCD_fit1.pdf", func=fit_qcd, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
+    common.go(pdf="QCD_fit2.pdf", func=fit_qcd, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
