@@ -117,10 +117,13 @@ def llk_scan(w, pdf, poiName, dataset):
     plot = r.RooStats.LikelihoodIntervalPlot(lInt)
     plot.SetMaximum(4.0)
 
-    return [lInt.LowerLimit(w.var(poiName)),
-            lInt.UpperLimit(w.var(poiName)),
-            plot,
-            ]
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
+    out = [lInt.LowerLimit(w.var(poiName)),
+           lInt.UpperLimit(w.var(poiName)),
+           plot,
+           ]
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
+    return out
 
 
 if __name__ == "__main__":
