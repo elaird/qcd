@@ -46,15 +46,28 @@ def one_page(canvas, pdf, tag, yTitle, yRange, results):
     h.SetStats(False)
     hx = h.GetXaxis()
     h.GetYaxis().SetTitleOffset(1.25)
+    h2 = h.Clone()
 
-    for iRes, (label, (val, err)) in enumerate(results):
+    for iRes, (label, (val, lower, upper)) in enumerate(results):
         iBin = 1 + iRes
         hx.SetBinLabel(iBin, label.replace(tag, ""))
-        h.SetBinContent(iBin, val)
-        h.SetBinError(iBin, err)
-    h.Draw()
+        h.SetBinContent(iBin, (upper + lower) / 2.0)
+        h.SetBinError(iBin, (upper - lower) / 2.0)
+        h2.SetBinContent(iBin, val)
+
+    h.SetMarkerColor(r.kWhite)
+    h.SetMarkerStyle(20)
+    h.SetMarkerSize(0.01 * h.GetMarkerSize())
+    h.SetMarkerColor(h.GetLineColor())
     h.SetMinimum(yRange[0])
     h.SetMaximum(yRange[1])
+    h.Draw("EX0")
+
+    h2.SetMarkerStyle(20)
+    h2.SetMarkerColor(h2.GetLineColor())
+    h2.SetMarkerSize(0.6 * h2.GetMarkerSize())
+    h2.Draw("psame")
+
     r.gPad.SetGridy()
     r.gPad.SetTickx()
     r.gPad.SetTicky()
@@ -96,7 +109,7 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
             if tag not in y.label:
                 continue
             val, lower, upper, plot = func(y)
-            results.append((y.label, (val, (upper - lower)/2.0)))
+            results.append((y.label, (val, lower, upper)))
             if plot:
                 rooplots.append((y.label, plot))
 
