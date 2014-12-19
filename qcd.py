@@ -73,28 +73,33 @@ def fit_qcd(y):
 
     w.defineSet("obs", common.argSet(w, ["n_M", "n_SSL", "n_SST"]))
     dataset = common.dataset(w.set("obs"))
-
     #w.Print()
 
     pdf = w.pdf("model")
+
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)
     res = common.fit(pdf=pdf, dataset=dataset)
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     #res.Print()
 
     var = w.var("qcd")
     out = [var.getVal(), var.getError()]
+    out.append(llk_scan_plot(w, pdf, "qcd", dataset))
+    return out
 
-    # ugh -- plot
+
+def llk_scan_plot(w, pdf, poiName, dataset):
     modelConfig = r.RooStats.ModelConfig("modelConfig", w)
     modelConfig.SetPdf(pdf)
-    modelConfig.SetParametersOfInterest("qcd")
+    modelConfig.SetParametersOfInterest(poiName)
 
     calc = r.RooStats.ProfileLikelihoodCalculator(dataset, modelConfig)
     calc.SetConfidenceLevel(0.68)
+
     lInt = calc.GetInterval()
     plot = r.RooStats.LikelihoodIntervalPlot(lInt)
     plot.SetMaximum(4.0)
-    plot.Draw()
-    return out + [plot]
+    return plot
 
 
 if __name__ == "__main__":
