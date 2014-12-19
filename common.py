@@ -61,6 +61,19 @@ def one_page(canvas, pdf, tag, yTitle, yRange, results):
     canvas.Print(pdf)
 
 
+def llk_plots(canvas, pdf, tag, yTitle, yRange, rooplots):
+    for label, plot in rooplots:
+        if not plot:
+            continue
+        r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
+        plot.Draw()
+        r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
+
+        r.gPad.SetTickx()
+        r.gPad.SetTicky()
+        canvas.Print(pdf)
+
+
 def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
     canvas = r.TCanvas()
     canvas.Print(pdf + "[")
@@ -75,18 +88,6 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
             rooplots.append((y.label, plot))
             results.append((y.label, (val, err)))
         one_page(canvas, pdf, tag, yTitle, yRange, results)
-
-        for label, plot in rooplots:
-            if not plot:
-                continue
-
-            r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
-            plot.Draw()
-            r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
-
-            r.gPad.SetTickx()
-            r.gPad.SetTicky()
-            canvas.Print(pdf)
-
+        llk_plots(canvas, pdf, tag, yTitle, yRange, rooplots)
 
     canvas.Print(pdf + "]")
