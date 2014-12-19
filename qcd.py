@@ -79,12 +79,12 @@ def fit_qcd(y):
 
     r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)
     res = common.fit(pdf=pdf, dataset=dataset)
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     #res.Print()
 
     var = w.var("qcd")
     out = [var.getVal(), var.getError()]
     out.append(llk_scan_plot(w, pdf, "qcd", dataset))
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     return out
 
 
