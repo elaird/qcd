@@ -96,6 +96,7 @@ def one_page(canvas, pdf, tag, yTitle, yRange, results):
         h.SetBinError(iBin, (upper - lower) / 2.0)
         h2.SetBinContent(iBin, val)
 
+    hx.SetLabelSize(1.5 * hx.GetLabelSize())
     h.SetMarkerColor(r.kWhite)
     h.SetMarkerStyle(20)
     h.SetMarkerSize(0.01 * h.GetMarkerSize())
