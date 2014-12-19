@@ -95,8 +95,8 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
         for y in data():
             if tag not in y.label:
                 continue
-            val, err, plot = func(y)
-            results.append((y.label, (val, err)))
+            val, lower, upper, plot = func(y)
+            results.append((y.label, (val, (upper - lower)/2.0)))
             if plot:
                 rooplots.append((y.label, plot))
 

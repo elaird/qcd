@@ -63,7 +63,7 @@ def arithmetic(y):
     assert y.n_M
     val = (y.n_M - y.ewk_M) / (y.n_L - y.ewk_L)
     err = val * r.TMath.sqrt(y.n_M) / y.n_M
-    return val, err, None
+    return val, val - err, val + err, None
 
 
 def fit_two_terms(y):
@@ -94,8 +94,8 @@ def fit_two_terms(y):
     #res.Print()
     r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
 
-    rVar = w.var("r")
-    return (rVar.getVal(), rVar.getError(), None)
+    v = w.var("r")
+    return (v.getVal(), v.getVal() - v.getError(), v.getVal() + v.getError(), None)
 
 
 if __name__ == "__main__":
