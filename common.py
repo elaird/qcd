@@ -1,5 +1,5 @@
 import ROOT as r
-
+import sys
 
 def setup():
     r.gROOT.SetBatch(True)
@@ -38,6 +38,47 @@ def dataset(obsSet):
     #out.reset() #needed?
     out.add(obsSet)
     #out.Print("v")
+    return out
+
+
+def fit_result(w, pdf, poiName, dataset, pl=None):
+    if type(pl) is not bool:
+        sys.exit("Choose whether fit_result shall compute PL limits.")
+
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)
+    res = fit(pdf=pdf, dataset=dataset)
+    #res.Print()
+
+    var = w.var(poiName)
+    out = [var.getVal()]
+
+    if pl:
+        out += llk_scan(w, pdf, poiName, dataset)
+    else:
+        out += [var.getVal() - var.getError(), var.getVal() + var.getError(), None]
+
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
+    return out
+
+
+def llk_scan(w, pdf, poiName, dataset):
+    modelConfig = r.RooStats.ModelConfig("modelConfig", w)
+    modelConfig.SetPdf(pdf)
+    modelConfig.SetParametersOfInterest(poiName)
+
+    calc = r.RooStats.ProfileLikelihoodCalculator(dataset, modelConfig)
+    calc.SetConfidenceLevel(0.68)
+
+    lInt = calc.GetInterval()
+    plot = r.RooStats.LikelihoodIntervalPlot(lInt)
+    plot.SetMaximum(4.0)
+
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
+    out = [lInt.LowerLimit(w.var(poiName)),
+           lInt.UpperLimit(w.var(poiName)),
+           plot,
+           ]
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     return out
 
 

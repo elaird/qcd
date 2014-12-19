@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import ROOT as r
-import sys
 import common
 
 
@@ -57,10 +56,7 @@ def fit_qcd_second_derivative(y):
     return fit_qcd(y, pl=False)
 
 
-def fit_qcd(y, pl=None):
-    if type(pl) is not bool:
-        sys.exit("Choose whether fit_qcd shall compute PL limits.")
-
+def fit_qcd(y, pl):
     # Pois(n_M | ewk_M + qcd/r2) x Pois(n_SST | ewk_SST + r2*q_SSL) x Pois(n_SSL | ewk_SSL + q_SSL)
 
     w = r.RooWorkspace("Workspace")
@@ -87,43 +83,7 @@ def fit_qcd(y, pl=None):
     dataset = common.dataset(w.set("obs"))
     #w.Print()
 
-    pdf = w.pdf("model")
-
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)
-    res = common.fit(pdf=pdf, dataset=dataset)
-    #res.Print()
-
-    var = w.var("qcd")
-    out = [var.getVal()]
-
-    if pl:
-        out += llk_scan(w, pdf, "qcd", dataset)
-    else:
-        out += [var.getVal() - var.getError(), var.getVal() + var.getError(), None]
-
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
-    return out
-
-
-def llk_scan(w, pdf, poiName, dataset):
-    modelConfig = r.RooStats.ModelConfig("modelConfig", w)
-    modelConfig.SetPdf(pdf)
-    modelConfig.SetParametersOfInterest(poiName)
-
-    calc = r.RooStats.ProfileLikelihoodCalculator(dataset, modelConfig)
-    calc.SetConfidenceLevel(0.68)
-
-    lInt = calc.GetInterval()
-    plot = r.RooStats.LikelihoodIntervalPlot(lInt)
-    plot.SetMaximum(4.0)
-
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
-    out = [lInt.LowerLimit(w.var(poiName)),
-           lInt.UpperLimit(w.var(poiName)),
-           plot,
-           ]
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
-    return out
+    return common.fit_result(w, w.pdf("model"), "qcd", dataset, pl)
 
 
 if __name__ == "__main__":
