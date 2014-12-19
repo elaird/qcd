@@ -62,16 +62,27 @@ def one_page(canvas, pdf, tag, yTitle, yRange, results):
 
 
 def llk_plots(canvas, pdf, tag, yTitle, yRange, rooplots):
-    for label, plot in rooplots:
-        if not plot:
-            continue
+    for i, (label, plot) in enumerate(rooplots):
+        j = i % 4
+        if j == 0:
+            canvas.cd(0)
+            canvas.Clear()
+            canvas.Divide(2, 2)
+
+        canvas.cd(1 + j)
+        r.gPad.SetTickx()
+        r.gPad.SetTicky()
+
+        title = label.replace(tag, "").replace(";", "#semicolon")
+        plot.SetTitle(title)
+
         r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
         plot.Draw()
         r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
 
-        r.gPad.SetTickx()
-        r.gPad.SetTicky()
-        canvas.Print(pdf)
+        if j == 3 or i == (len(rooplots) - 1):
+            canvas.cd(0)
+            canvas.Print(pdf)
 
 
 def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
@@ -85,8 +96,10 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
             if tag not in y.label:
                 continue
             val, err, plot = func(y)
-            rooplots.append((y.label, plot))
             results.append((y.label, (val, err)))
+            if plot:
+                rooplots.append((y.label, plot))
+
         one_page(canvas, pdf, tag, yTitle, yRange, results)
         llk_plots(canvas, pdf, tag, yTitle, yRange, rooplots)
 
