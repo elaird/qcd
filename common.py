@@ -79,7 +79,11 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
         for label, plot in rooplots:
             if not plot:
                 continue
+
+            r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.FATAL)
             plot.Draw()
+            r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
+
             r.gPad.SetTickx()
             r.gPad.SetTicky()
             canvas.Print(pdf)
