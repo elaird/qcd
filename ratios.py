@@ -62,7 +62,7 @@ def data_SS_relaxed_to_tight():
 def arithmetic(y):
     assert y.n_M
     val = (y.n_M - y.ewk_M) / (y.n_L - y.ewk_L)
-    err = val * r.TMath.sqrt(y.n_M) / y.n_M
+    err = val * r.TMath.Sqrt(y.n_M) / y.n_M
     return val, val - err, val + err, None
 
 

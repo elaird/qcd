@@ -40,7 +40,7 @@ def data():
 def arithmetic(y):
     assert y.n_SST
     val = (y.n_M - y.ewk_M) * (y.n_SST - y.ewk_SST) / (y.n_SSL - y.ewk_SSL)
-    err = val * r.TMath.sqrt(y.n_SST) / y.n_SST
+    err = val * r.TMath.Sqrt(y.n_SST) / y.n_SST
     return val, val - err, val + err, None
 
 
