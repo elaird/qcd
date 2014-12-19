@@ -18,7 +18,6 @@ def wimport(w, item):
 
 
 def fit(pdf=None, dataset=None):
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
     options = [r.RooFit.Verbose(False),
                r.RooFit.PrintLevel(-1),
                r.RooFit.Save(True),
@@ -68,15 +67,22 @@ def go(pdf="", tags=[], yTitle="", yRange=None, func=None, data=None):
 
     for tag in tags:
         results = []
+        rooplots = []
         for y in data():
             if tag not in y.label:
                 continue
             val, err, plot = func(y)
-            if plot:
-                plot.Draw()
-                canvas.Print(pdf)
-
+            rooplots.append((y.label, plot))
             results.append((y.label, (val, err)))
         one_page(canvas, pdf, tag, yTitle, yRange, results)
+
+        for label, plot in rooplots:
+            if not plot:
+                continue
+            plot.Draw()
+            r.gPad.SetTickx()
+            r.gPad.SetTicky()
+            canvas.Print(pdf)
+
 
     canvas.Print(pdf + "]")
