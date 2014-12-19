@@ -82,7 +82,7 @@ if __name__ == "__main__":
     common.setup()
 
     __qcd = {"data": data, "yTitle": "QCD yield estimate"}
-    common.go(pdf="QCD_arithmetic1.pdf", func=arithmetic, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
+    common.go(pdf="QCD_arithmetic1.pdf", func=arithmetic, tags=["1;"], yRange=(0.0, 50.0), **__qcd)
     common.go(pdf="QCD_arithmetic2.pdf", func=arithmetic, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
-    common.go(pdf="QCD_fit1.pdf", func=fit_qcd, tags=["1;"], yRange=(0.0, 40.0), **__qcd)
+    common.go(pdf="QCD_fit1.pdf", func=fit_qcd, tags=["1;"], yRange=(0.0, 50.0), **__qcd)
     common.go(pdf="QCD_fit2.pdf", func=fit_qcd, tags=["2;"], yRange=(0.0, 15.0), **__qcd)
