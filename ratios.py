@@ -71,7 +71,7 @@ def fit_two_terms(y):
 
     w = r.RooWorkspace("Workspace")
     wimport = common.wimport
-    wimport(w, r.RooRealVar("r", "r", 0.2, -0.1, 1.0))  # parameter of interest: loose to medium factor
+    wimport(w, r.RooRealVar("r", "r", 0.2, 0.0, 1.0))  # parameter of interest: loose to medium factor
     wimport(w, r.RooRealVar("qcd_L", "qcd_L", y.n_L, 0.0, 10.0 * max(1.0, y.n_L)))
 
     for l in ["M", "L"]:
@@ -87,15 +87,10 @@ def fit_two_terms(y):
     w.factory("PROD::model(pois_L,pois_M)")
 
     w.defineSet("obs", common.argSet(w, ["n_L", "n_M"]))
+    dataset = common.dataset(w.set("obs"))
     #w.Print()
 
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)
-    res = common.fit(pdf=w.pdf("model"), dataset=common.dataset(w.set("obs")))
-    #res.Print()
-    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
-
-    v = w.var("r")
-    return (v.getVal(), v.getVal() - v.getError(), v.getVal() + v.getError(), None)
+    return common.fit_result(w, w.pdf("model"), "r", dataset, pl=True)
 
 
 if __name__ == "__main__":
