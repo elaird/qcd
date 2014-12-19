@@ -89,8 +89,10 @@ def fit_two_terms(y):
     w.defineSet("obs", common.argSet(w, ["n_L", "n_M"]))
     #w.Print()
 
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.WARNING)
     res = common.fit(pdf=w.pdf("model"), dataset=common.dataset(w.set("obs")))
     #res.Print()
+    r.RooMsgService.instance().setGlobalKillBelow(r.RooFit.DEBUG)
 
     rVar = w.var("r")
     return (rVar.getVal(), rVar.getError(), None)
